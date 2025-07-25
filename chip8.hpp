@@ -79,44 +79,16 @@ struct Chip8
             0xF0, 0x80, 0xF0, 0x80, 0x80  // F
     };
 
-    void LoadRom(char const *filename)
-    {
-        std::ifstream file(filename, std::ios::binary | std::ios::ate);
+    void LoadRom(char const *filename);
+    void Cycle();
 
-        if (file.is_open())
-        {
-            std::streampos size = file.tellg();
-            char *buffer = new char[size];
-
-            file.seekg(0, std::ios::beg);
-            file.read(buffer, size);
-            file.close();
-
-            for (long i = 0; i <= size; ++i)
-            {
-                memory[START_ADRESS + i] = buffer[i];
-            }
-
-            delete[] buffer;
-        }
-    }
-
-    // Istructios
-
-    // clear
+    // OPCODES
     void OP00E0();
-    // retur
     void OP00EE();
-
-    // jump
     void OP1nnn();
-    // call
     void OP2nnn();
-    // Skip next instruction if Vx = kk.
     void OP3xkk();
-    // Skip next instruction if Vx != kk.
     void OP4xkk();
-
     void OP5xy0();
     void OP6xkk();
     void OP7xkk();

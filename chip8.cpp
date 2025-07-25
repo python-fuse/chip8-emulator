@@ -149,6 +149,7 @@ void Chip8::Cycle()
             OPFx65();
             break;
         }
+        break;
     }
 }
 

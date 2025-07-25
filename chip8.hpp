@@ -5,6 +5,7 @@
 #include <fstream>
 #include <chrono>
 #include <random>
+#include <bits/stdc++.h>
 
 struct Chip8
 {
@@ -19,6 +20,9 @@ struct Chip8
 
     // PC Register
     uint16_t pc;
+
+    const unsigned int DISPLAY_WIDTH = 64;
+    const unsigned int DISPLAY_HEIGHT = 32;
 
     // Stack poiter
     uint8_t sp;
@@ -39,6 +43,9 @@ struct Chip8
     // opcode
     uint16_t opcode;
 
+    // draw flag
+    bool shouldDraw;
+
     const unsigned int START_ADRESS = 0x200;
 
     const unsigned int FONTSET_START_ADDRESS = 0x50;
@@ -46,6 +53,22 @@ struct Chip8
     Chip8() : randGen(std::chrono::system_clock::now().time_since_epoch().count())
     {
         pc = START_ADRESS;
+
+        // Initialize screen to all black (0)
+        memset(screen, 0, sizeof(screen));
+
+        // Initialize all other arrays
+        memset(memory, 0, sizeof(memory));
+        memset(registers, 0, sizeof(registers));
+        memset(keypad, 0, sizeof(keypad));
+        memset(stack, 0, sizeof(stack));
+
+        // Reset other variables
+        I = 0;
+        sp = 0;
+        d_timer = 0;
+        s_timer = 0;
+        shouldDraw = false;
 
         for (unsigned int i = 0; i < 80; ++i)
         {

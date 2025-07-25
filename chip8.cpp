@@ -7,15 +7,35 @@ const uint16_t X_MASK = 0x0f00u;
 const uint16_t Y_MASK = 0x00f0u;
 const uint8_t N_MASK = 0x000fu;
 
-const int DISPLAY_HEIGHT(32);
-const int DISPLAY_WIDTH(64);
+const int DISPLAY_HEIGHT = 32;
+const int DISPLAY_WIDTH = 64;
 
 // Cycle
 void Chip8::Cycle()
 {
+
+    // Check for PC bounds BEFORE reading memory
+    if (pc < START_ADRESS || pc >= 4094)
+    {
+        std::cout << "ERROR: PC out of bounds: " << std::hex << pc << std::endl;
+        std::cout << "PC should be between " << std::hex << START_ADRESS << " and 4094" << std::endl;
+        return;
+    }
+
+    uint16_t prevPC = pc; // Track previous PC
     opcode = (memory[pc] << 8u) | memory[pc + 1];
     pc += 2;
 
+    // Debug output
+    std::cout << "PC: " << std::hex << prevPC << " -> " << pc << " Opcode: " << std::hex << opcode << std::endl;
+
+    // Special case for opcode 0
+    if (opcode == 0)
+    {
+        std::cout << "WARNING: Executing opcode 0 at PC " << std::hex << prevPC << std::endl;
+        std::cout << "Memory at that location: " << std::hex << (int)memory[prevPC] << " " << (int)memory[prevPC + 1] << std::endl;
+        return; // Stop execution to prevent infinite loop
+    }
     switch (opcode & 0xf000u)
     {
     case 0x0000:
@@ -28,6 +48,7 @@ void Chip8::Cycle()
             OP00EE();
             break;
         }
+        break;
 
     case 0x1000:
         OP1nnn();
@@ -36,40 +57,42 @@ void Chip8::Cycle()
     case 0x2000:
         OP2nnn();
         break;
+
     case 0x3000:
         OP3xkk();
         break;
+
     case 0x4000:
         OP4xkk();
         break;
+
     case 0x5000:
         OP5xy0();
         break;
+
     case 0x6000:
         OP6xkk();
         break;
+
     case 0x7000:
         OP7xkk();
         break;
+
     case 0x8000:
         switch (opcode & 0x000f)
         {
         case 0x0:
             OP8xy0();
             break;
-
         case 0x1:
             OP8xy1();
             break;
-
         case 0x2:
             OP8xy2();
             break;
-
         case 0x3:
             OP8xy3();
             break;
-
         case 0x4:
             OP8xy4();
             break;
@@ -91,9 +114,11 @@ void Chip8::Cycle()
     case 0x9000:
         OP9xy0();
         break;
+
     case 0xA000:
         OPAnnn();
         break;
+
     case 0xB000:
         OPBnnn();
         break;
@@ -140,7 +165,7 @@ void Chip8::Cycle()
             OPFx29();
             break;
         case 0x33:
-            OPFx33;
+            OPFx33();
             break;
         case 0x55:
             OPFx55();
@@ -150,7 +175,20 @@ void Chip8::Cycle()
             break;
         }
         break;
+
+    default:
+        std::cout << "UNIMPLEMENTED OPCODE: " << std::hex << opcode << " at PC: " << (pc - 2) << std::endl;
+        std::cout << "Opcode family: " << std::hex << (opcode & 0xF000) << std::endl;
+
+        // Don't crash, just skip for now
+        break;
     }
+
+    // Timers
+    if (d_timer > 0)
+        --d_timer;
+    if (s_timer > 0)
+        --s_timer;
 }
 
 void Chip8::LoadRom(char const *filename)
@@ -177,28 +215,18 @@ void Chip8::LoadRom(char const *filename)
 
             delete[] buffer;
         }
-    }
-    {
-        std::streampos size = file.tellg();
-        char *buffer = new char[size];
-
-        file.seekg(0, std::ios::beg);
-        file.read(buffer, size);
-        file.close();
-
-        for (long i = 0; i <= size; ++i)
+        else
         {
-            memory[START_ADRESS + i] = buffer[i];
+            std::cerr << "Falied to load thr ROm file!" << std::endl;
         }
-
-        delete[] buffer;
     }
 }
 
 // Clear screen
 void Chip8::OP00E0()
 {
-    std::memset(screen, 0, sizeof(Chip8::screen));
+    std::memset(screen, 0, sizeof(screen));
+    shouldDraw = true;
 };
 
 // return from subroutine
@@ -218,7 +246,8 @@ void Chip8::OP1nnn()
 void Chip8::OP2nnn()
 {
     uint16_t nnn = opcode & NNN_MASK;
-    stack[0] = pc;
+    stack[sp] = pc;
+    ++sp;
     pc = nnn;
 };
 
@@ -228,7 +257,7 @@ void Chip8::OP3xkk()
     uint8_t x = (opcode & X_MASK) >> 8u;
     uint8_t kk = opcode & KK_MASK;
 
-    if (x == kk)
+    if (registers[x] == kk)
     {
         pc += 2;
     }
@@ -240,7 +269,7 @@ void Chip8::OP4xkk()
     uint8_t x = (opcode & X_MASK) >> 8u;
     uint8_t kk = opcode & KK_MASK;
 
-    if (x != kk)
+    if (registers[x] != kk)
     {
         pc += 2;
     }
@@ -252,7 +281,7 @@ void Chip8::OP5xy0()
     uint8_t x = (opcode & X_MASK) >> 8u;
     uint8_t y = (opcode & Y_MASK) >> 4u;
 
-    if (x == y)
+    if (registers[x] == registers[y])
     {
         pc += 2;
     }
@@ -446,34 +475,41 @@ void Chip8::OPDxyn()
     uint8_t _x = (opcode & X_MASK) >> 8u;
     uint8_t _y = (opcode & Y_MASK) >> 4u;
 
-    uint8_t x(registers[_x] % DISPLAY_WIDTH);
-    uint8_t y(registers[_y] % DISPLAY_HEIGHT);
-
-    registers[0xf] = 0;
+    uint8_t x = registers[_x] % DISPLAY_WIDTH;
+    uint8_t y = registers[_y] % DISPLAY_HEIGHT;
 
     uint8_t height = opcode & 0x000F;
+    registers[0xF] = 0; // Reset collision flag
 
     for (uint8_t row = 0; row < height; ++row)
     {
         uint8_t spriteByte = memory[I + row];
 
-        for (uint8_t col(0); col < 8; ++col)
+        for (uint8_t col = 0; col < 8; ++col)
         {
-            uint8_t spritePixel = (spriteByte & (0x80 >> col));
-            uint32_t *screenPixel = &screen[(y + row) * DISPLAY_WIDTH + (x + col)];
+            // Extract the pixel bit (either 0 or 1)
+            uint8_t spritePixel = (spriteByte >> (7 - col)) & 0x1;
+
+            // Wrap around if x + col >= DISPLAY_WIDTH
+            uint32_t posX = (x + col) % DISPLAY_WIDTH;
+            uint32_t posY = (y + row) % DISPLAY_HEIGHT;
+
+            uint32_t index = posY * DISPLAY_WIDTH + posX;
 
             if (spritePixel)
             {
-                if (*screenPixel)
-                {
-                    registers[0xf] = 1;
-                }
+                // If the screen pixel is already set, we have a collision
+                if (screen[index] == 0xFFFFFFFF)
+                    registers[0xF] = 1;
 
-                *screenPixel ^= 0xffffffff;
+                // XOR the pixel (toggle on/off)
+                screen[index] ^= 0xFFFFFFFF;
             }
         }
     }
-};
+
+    shouldDraw = true;
+}
 
 // Ex9E - SKP Vx
 // Skip next instruction if key with the value of Vx is pressed.

@@ -6,6 +6,10 @@ using namespace sf;
 Platform::Platform(std::string title) : window(sf::VideoMode({windowWidth * pixelSize, windowHeight * pixelSize}), title)
 {
     window.setFramerateLimit(60);
+
+    // Debug output
+    std::cout << "Platform constructor - windowWidth: " << windowWidth << ", windowHeight: " << windowHeight << std::endl;
+    std::cout << "Window size: " << windowWidth * pixelSize << "x" << windowHeight * pixelSize << std::endl;
 }
 
 Platform::~Platform()
@@ -15,14 +19,11 @@ Platform::~Platform()
 
 void Platform::handleEvents()
 {
-    while (window.isOpen())
+    while (const std::optional event = window.pollEvent())
     {
-        while (const std::optional event = window.pollEvent())
+        if (event->is<sf::Event::Closed>())
         {
-            if (event->is<sf::Event::Closed>())
-            {
-                window.close();
-            }
+            window.close();
         }
     }
 }
@@ -36,23 +37,24 @@ bool Platform::isOpen() const
 {
     return window.isOpen();
 }
-
 void Platform::display(void const *buffer)
 {
+    std::cout << "Displaying frame\n";
+
     const uint32_t *pixels = static_cast<const uint32_t *>(buffer);
 
     window.clear();
     sf::RectangleShape pixelShape({(float)pixelSize, (float)pixelSize});
-
     pixelShape.setFillColor(sf::Color::White);
 
+    // Fixed: Use windowWidth and windowHeight directly (64x32)
     for (int y = 0; y < windowHeight; ++y)
     {
         for (int x = 0; x < windowWidth; ++x)
         {
             if (pixels[y * windowWidth + x])
             {
-                pixelShape.setPosition(sf::Vector2<float>(x * windowWidth, y * windowHeight));
+                pixelShape.setPosition(sf::Vector2<float>(x * pixelSize, y * pixelSize));
                 window.draw(pixelShape);
             }
         }
@@ -60,7 +62,6 @@ void Platform::display(void const *buffer)
 
     window.display();
 }
-
 void Platform::processInput(uint8_t *keys)
 {
     for (int i = 0; i < 16; i++)
@@ -73,7 +74,7 @@ void Platform::processInput(uint8_t *keys)
     if (Keyboard::isKeyPressed(Keyboard::Scan::Num3))
         keys[0x3] = 1;
     if (Keyboard::isKeyPressed(Keyboard::Scan::Num4))
-        keys[0xc] = 4;
+        keys[0xc] = 1;
 
     if (Keyboard::isKeyPressed(Keyboard::Scan::Q))
         keys[0x4] = 1;

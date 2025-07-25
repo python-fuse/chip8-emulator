@@ -6,10 +6,10 @@
 class Platform
 {
 private:
-    sf::RenderWindow window;
     const int windowWidth = 64;
     const int windowHeight = 32;
     const int pixelSize = 10;
+    sf::RenderWindow window;
 
 public:
     Platform(std::string title);

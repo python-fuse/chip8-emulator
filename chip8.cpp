@@ -445,7 +445,7 @@ void Chip8::OP9xy0()
 void Chip8::OPAnnn()
 {
     uint16_t nnn = opcode & NNN_MASK;
-    I = nnn;
+    IR = nnn;
 };
 
 // Bnnn - JP V0, addr
@@ -490,7 +490,7 @@ void Chip8::OPDxyn()
 
     for (uint8_t row = 0; row < height; ++row)
     {
-        uint8_t spriteByte = memory[I + row];
+        uint8_t spriteByte = memory[IR + row];
 
         for (uint8_t col = 0; col < 8; ++col)
         {
@@ -661,7 +661,7 @@ void Chip8::OPFx18()
 void Chip8::OPFx1E()
 {
     uint8_t x = (opcode & X_MASK) >> 8u;
-    I += registers[x];
+    IR += registers[x];
 };
 
 // Fx29 - LD F, Vx
@@ -672,7 +672,7 @@ void Chip8::OPFx29()
     uint8_t x = (opcode & X_MASK) >> 8u;
     uint8_t digit = registers[x];
 
-    I = FONTSET_START_ADDRESS + (5 * digit);
+    IR = FONTSET_START_ADDRESS + (5 * digit);
 };
 
 // Fx33 - LD B, Vx
@@ -684,15 +684,15 @@ void Chip8::OPFx33()
     uint8_t val = registers[x];
 
     // Ones place
-    memory[I + 2] = val % 10;
+    memory[IR + 2] = val % 10;
     val /= 10;
 
     // tens
-    memory[I + 1] = val % 10;
+    memory[IR + 1] = val % 10;
     val /= 10;
 
     // hundreds
-    memory[I] = val % 10;
+    memory[IR] = val % 10;
 };
 
 // Fx55 - LD [I], Vx
@@ -706,7 +706,7 @@ void Chip8::OPFx55()
 
     for (uint8_t i = 0; i < x; ++i)
     {
-        memory[I + i] = registers[i];
+        memory[IR + i] = registers[i];
     }
 };
 
@@ -719,6 +719,6 @@ void Chip8::OPFx65()
 
     for (uint8_t i = 0; i <= x; ++i)
     {
-        registers[i] = memory[I + i];
+        registers[i] = memory[IR + i];
     }
 }

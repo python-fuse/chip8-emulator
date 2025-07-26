@@ -16,7 +16,7 @@ struct Chip8
     uint8_t registers[16];
 
     // I Register
-    uint16_t I;
+    uint16_t IR;
 
     // PC Register
     uint16_t pc;
@@ -64,7 +64,7 @@ struct Chip8
         memset(stack, 0, sizeof(stack));
 
         // Reset other variables
-        I = 0;
+        IR = 0;
         sp = 0;
         d_timer = 0;
         s_timer = 0;

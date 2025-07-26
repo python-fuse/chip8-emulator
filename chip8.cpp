@@ -358,12 +358,12 @@ void Chip8::OP8xy4()
 
     uint16_t sum = registers[x] + registers[y];
 
+    registers[x] = sum & 0xff;
+
     if (sum > 0xffu)
         registers[0xfu] = 1;
     else
         registers[0xfu] = 0;
-
-    registers[x] = sum & 0xff;
 };
 
 // 8xy5 - SUB Vx, Vy
@@ -704,7 +704,7 @@ void Chip8::OPFx55()
 {
     uint8_t x = (opcode & X_MASK) >> 8u;
 
-    for (uint8_t i = 0; i < x; ++i)
+    for (uint8_t i = 0; i <= x; ++i)
     {
         memory[IR + i] = registers[i];
     }

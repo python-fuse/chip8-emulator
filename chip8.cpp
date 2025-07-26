@@ -390,7 +390,7 @@ void Chip8::OP8xy6()
 {
     uint8_t x = (opcode & X_MASK) >> 8u;
 
-    registers[0xf] = registers[x] & 1;
+    registers[0xf] = registers[x] & 0x1u;
 
     registers[x] >>= 1;
 };
@@ -403,7 +403,11 @@ void Chip8::OP8xy7()
     uint8_t x = (opcode & X_MASK) >> 8;
     uint8_t y = (opcode & Y_MASK) >> 4;
 
-    registers[y] > registers[x] ? registers[0xf] = 1 : registers[0xf] = 0;
+    // registers[y] > registers[x] ? registers[0xf] = 1 : registers[0xf] = 0;
+    if (registers[y] > registers[x])
+        registers[0xfu] = 1;
+    else
+        registers[0xfu] = 0;
 
     registers[x] = registers[y] - registers[x];
 };
@@ -414,7 +418,7 @@ void Chip8::OP8xy7()
 void Chip8::OP8xyE()
 {
     uint8_t x = (opcode & X_MASK) >> 8u;
-    uint8_t msb = (registers[x] & 0x80) >> 7;
+    uint8_t msb = (registers[x] & 0x80u) >> 7u;
 
     registers[0xf] = msb;
 
@@ -472,6 +476,8 @@ void Chip8::OPCxkk()
 // The interpreter reads n bytes from memory, starting at the address stored in I. These bytes are then displayed as sprites on screen at coordinates (Vx, Vy). Sprites are XORed onto the existing screen. If this causes any pixels to be erased, VF is set to 1, otherwise it is set to 0. If the sprite is positioned so part of it is outside the coordinates of the display, it wraps around to the opposite side of the screen. See instruction 8xy3 for more information on XOR, and section 2.4, Display, for more information on the Chip-8 screen and sprites.
 void Chip8::OPDxyn()
 {
+    shouldDraw = true;
+
     uint8_t _x = (opcode & X_MASK) >> 8u;
     uint8_t _y = (opcode & Y_MASK) >> 4u;
 
@@ -479,6 +485,7 @@ void Chip8::OPDxyn()
     uint8_t y = registers[_y] % DISPLAY_HEIGHT;
 
     uint8_t height = opcode & 0x000F;
+
     registers[0xF] = 0; // Reset collision flag
 
     for (uint8_t row = 0; row < height; ++row)
@@ -507,8 +514,6 @@ void Chip8::OPDxyn()
             }
         }
     }
-
-    shouldDraw = true;
 }
 
 // Ex9E - SKP Vx
@@ -530,7 +535,7 @@ void Chip8::OPEx9E()
 // Checks the keyboard, and if the key corresponding to the value of Vx is currently in the up position, PC is increased by 2.
 void Chip8::OPExA1()
 {
-    uint8_t x = (opcode & X_MASK) >> 8;
+    uint8_t x = (opcode & X_MASK) >> 8u;
     uint8_t key = registers[x];
 
     if (!keypad[key])
@@ -544,7 +549,7 @@ void Chip8::OPExA1()
 // The value of DT is placed into Vx.
 void Chip8::OPFx07()
 {
-    uint8_t x = (opcode & X_MASK) >> 8;
+    uint8_t x = (opcode & X_MASK) >> 8u;
 
     registers[x] = d_timer;
 };
@@ -559,7 +564,7 @@ void Chip8::OPFx0A()
 
     if (keypad[0])
     {
-        registers[x] = 1;
+        registers[x] = 0;
     }
     else if (keypad[1])
     {
@@ -699,7 +704,7 @@ void Chip8::OPFx55()
 {
     uint8_t x = (opcode & X_MASK) >> 8u;
 
-    for (uint8_t i = 0; i < x; ++I)
+    for (uint8_t i = 0; i < x; ++i)
     {
         memory[I + i] = registers[i];
     }

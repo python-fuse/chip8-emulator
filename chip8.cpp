@@ -14,181 +14,186 @@ const int DISPLAY_WIDTH = 64;
 void Chip8::Cycle()
 {
 
-    // Check for PC bounds BEFORE reading memory
-    if (pc < START_ADRESS || pc >= 4094)
-    {
-        std::cout << "ERROR: PC out of bounds: " << std::hex << pc << std::endl;
-        std::cout << "PC should be between " << std::hex << START_ADRESS << " and 4094" << std::endl;
-        return;
-    }
-
-    uint16_t prevPC = pc; // Track previous PC
-    opcode = (memory[pc] << 8u) | memory[pc + 1];
-    pc += 2;
-
-    // Debug output
-    std::cout << "PC: " << std::hex << prevPC << " -> " << pc << " Opcode: " << std::hex << opcode << std::endl;
-
-    // Special case for opcode 0
-    if (opcode == 0)
-    {
-        std::cout << "WARNING: Executing opcode 0 at PC " << std::hex << prevPC << std::endl;
-        std::cout << "Memory at that location: " << std::hex << (int)memory[prevPC] << " " << (int)memory[prevPC + 1] << std::endl;
-        return; // Stop execution to prevent infinite loop
-    }
-    switch (opcode & 0xf000u)
-    {
-    case 0x0000:
-        switch (opcode)
-        {
-        case 0x00e0:
-            OP00E0();
-            break;
-        case 0x00ee:
-            OP00EE();
-            break;
-        }
-        break;
-
-    case 0x1000:
-        OP1nnn();
-        break;
-
-    case 0x2000:
-        OP2nnn();
-        break;
-
-    case 0x3000:
-        OP3xkk();
-        break;
-
-    case 0x4000:
-        OP4xkk();
-        break;
-
-    case 0x5000:
-        OP5xy0();
-        break;
-
-    case 0x6000:
-        OP6xkk();
-        break;
-
-    case 0x7000:
-        OP7xkk();
-        break;
-
-    case 0x8000:
-        switch (opcode & 0x000f)
-        {
-        case 0x0:
-            OP8xy0();
-            break;
-        case 0x1:
-            OP8xy1();
-            break;
-        case 0x2:
-            OP8xy2();
-            break;
-        case 0x3:
-            OP8xy3();
-            break;
-        case 0x4:
-            OP8xy4();
-            break;
-        case 0x5:
-            OP8xy5();
-            break;
-        case 0x6:
-            OP8xy6();
-            break;
-        case 0x7:
-            OP8xy7();
-            break;
-        case 0xE:
-            OP8xyE();
-            break;
-        }
-        break;
-
-    case 0x9000:
-        OP9xy0();
-        break;
-
-    case 0xA000:
-        OPAnnn();
-        break;
-
-    case 0xB000:
-        OPBnnn();
-        break;
-
-    case 0xC000:
-        OPCxkk();
-        break;
-
-    case 0xd000:
-        OPDxyn();
-        break;
-
-    case 0xe000:
-        switch (opcode & 0x00ff)
-        {
-        case 0x9e:
-            OPEx9E();
-            break;
-        case 0xa1:
-            OPExA1();
-            break;
-        }
-        break;
-
-    case 0xf000:
-        switch (opcode & 0x00ff)
-        {
-        case 0x07:
-            OPFx07();
-            break;
-        case 0x0a:
-            OPFx0A();
-            break;
-        case 0x15:
-            OPFx15();
-            break;
-        case 0x18:
-            OPFx18();
-            break;
-        case 0x1E:
-            OPFx1E();
-            break;
-        case 0x29:
-            OPFx29();
-            break;
-        case 0x33:
-            OPFx33();
-            break;
-        case 0x55:
-            OPFx55();
-            break;
-        case 0x65:
-            OPFx65();
-            break;
-        }
-        break;
-
-    default:
-        std::cout << "UNIMPLEMENTED OPCODE: " << std::hex << opcode << " at PC: " << (pc - 2) << std::endl;
-        std::cout << "Opcode family: " << std::hex << (opcode & 0xF000) << std::endl;
-
-        // Don't crash, just skip for now
-        break;
-    }
-
     // Timers
     if (d_timer > 0)
         --d_timer;
     if (s_timer > 0)
         --s_timer;
+
+    for (short i = 0; i < 12; i++)
+    {
+
+        // Check for PC bounds BEFORE reading memory
+        if (pc < START_ADRESS || pc >= 4095)
+        {
+            std::cout << "ERROR: PC out of bounds: " << std::hex << pc << std::endl;
+            std::cout << "PC should be between " << std::hex << START_ADRESS << " and 4094" << std::endl;
+            return;
+        }
+
+        uint16_t prevPC = pc; // Track previous PC
+        opcode = (memory[pc] << 8u) | memory[pc + 1];
+        pc += 2;
+
+        // Debug output
+        std::cout << "PC: " << std::hex << prevPC << " -> " << pc << " Opcode: " << std::hex << opcode << std::endl;
+
+        // Special case for opcode 0
+        if (opcode == 0)
+        {
+            std::cout << "WARNING: Executing opcode 0 at PC " << std::hex << prevPC << std::endl;
+            std::cout << "Memory at that location: " << std::hex << (int)memory[prevPC] << " " << (int)memory[prevPC + 1] << std::endl;
+            return; // Stop execution to prevent infinite loop
+        }
+
+        switch (opcode & 0xf000u)
+        {
+        case 0x0000:
+            switch (opcode)
+            {
+            case 0x00e0:
+                OP00E0();
+                break;
+            case 0x00ee:
+                OP00EE();
+                break;
+            }
+            break;
+
+        case 0x1000:
+            OP1nnn();
+            break;
+
+        case 0x2000:
+            OP2nnn();
+            break;
+
+        case 0x3000:
+            OP3xkk();
+            break;
+
+        case 0x4000:
+            OP4xkk();
+            break;
+
+        case 0x5000:
+            OP5xy0();
+            break;
+
+        case 0x6000:
+            OP6xkk();
+            break;
+
+        case 0x7000:
+            OP7xkk();
+            break;
+
+        case 0x8000:
+            switch (opcode & 0x000f)
+            {
+            case 0x0:
+                OP8xy0();
+                break;
+            case 0x1:
+                OP8xy1();
+                break;
+            case 0x2:
+                OP8xy2();
+                break;
+            case 0x3:
+                OP8xy3();
+                break;
+            case 0x4:
+                OP8xy4();
+                break;
+            case 0x5:
+                OP8xy5();
+                break;
+            case 0x6:
+                OP8xy6();
+                break;
+            case 0x7:
+                OP8xy7();
+                break;
+            case 0xE:
+                OP8xyE();
+                break;
+            }
+            break;
+
+        case 0x9000:
+            OP9xy0();
+            break;
+
+        case 0xA000:
+            OPAnnn();
+            break;
+
+        case 0xB000:
+            OPBnnn();
+            break;
+
+        case 0xC000:
+            OPCxkk();
+            break;
+
+        case 0xd000:
+            OPDxyn();
+            break;
+
+        case 0xe000:
+            switch (opcode & 0x00ff)
+            {
+            case 0x9e:
+                OPEx9E();
+                break;
+            case 0xa1:
+                OPExA1();
+                break;
+            }
+            break;
+
+        case 0xf000:
+            switch (opcode & 0x00ff)
+            {
+            case 0x07:
+                OPFx07();
+                break;
+            case 0x0a:
+                OPFx0A();
+                break;
+            case 0x15:
+                OPFx15();
+                break;
+            case 0x18:
+                OPFx18();
+                break;
+            case 0x1E:
+                OPFx1E();
+                break;
+            case 0x29:
+                OPFx29();
+                break;
+            case 0x33:
+                OPFx33();
+                break;
+            case 0x55:
+                OPFx55();
+                break;
+            case 0x65:
+                OPFx65();
+                break;
+            }
+            break;
+
+        default:
+            std::cout << "UNIMPLEMENTED OPCODE: " << std::hex << opcode << " at PC: " << (pc - 2) << std::endl;
+            std::cout << "Opcode family: " << std::hex << (opcode & 0xF000) << std::endl;
+
+            // Don't crash, just skip for now
+            break;
+        }
+    }
 }
 
 void Chip8::LoadRom(char const *filename)
@@ -226,7 +231,6 @@ void Chip8::LoadRom(char const *filename)
 void Chip8::OP00E0()
 {
     std::memset(screen, 0, sizeof(screen));
-    shouldDraw = true;
 };
 
 // return from subroutine
@@ -374,13 +378,20 @@ void Chip8::OP8xy5()
     uint8_t x = (opcode & X_MASK) >> 8u;
     uint8_t y = (opcode & Y_MASK) >> 4u;
 
-    if (registers[x] > registers[y])
-        registers[0xf] = 1;
-    else
-        registers[0xf] = 0;
-
     uint8_t diff = registers[x] - registers[y];
-    registers[x] = diff;
+
+    if (registers[x] >= registers[y])
+    {
+        registers[x] = diff;
+
+        registers[0xf] = 1;
+    }
+    else
+    {
+        registers[x] = diff;
+
+        registers[0xf] = 0;
+    }
 };
 
 // 8xy6 - SHR Vx {, Vy}
@@ -389,11 +400,12 @@ void Chip8::OP8xy5()
 void Chip8::OP8xy6()
 {
     uint8_t x = (opcode & X_MASK) >> 8u;
-
-    registers[0xf] = registers[x] & 0x1u;
-
+    uint8_t y = (opcode & Y_MASK) >> 4u;
+    registers[x] = registers[y];
+    uint8_t temp = registers[x] & 0x1u;
     registers[x] >>= 1;
-};
+    registers[0xF] = temp;
+}
 
 // 8xy7 - SUBN Vx, Vy
 // Set Vx = Vy - Vx, set VF = NOT borrow.
@@ -404,12 +416,12 @@ void Chip8::OP8xy7()
     uint8_t y = (opcode & Y_MASK) >> 4;
 
     // registers[y] > registers[x] ? registers[0xf] = 1 : registers[0xf] = 0;
-    if (registers[y] > registers[x])
+    registers[x] = registers[y] - registers[x];
+
+    if (registers[y] >= registers[x])
         registers[0xfu] = 1;
     else
         registers[0xfu] = 0;
-
-    registers[x] = registers[y] - registers[x];
 };
 
 // 8xyE - SHL Vx {, Vy}
@@ -418,11 +430,11 @@ void Chip8::OP8xy7()
 void Chip8::OP8xyE()
 {
     uint8_t x = (opcode & X_MASK) >> 8u;
+    uint8_t y = (opcode & Y_MASK) >> 4u;
+    registers[x] = registers[y];
     uint8_t msb = (registers[x] & 0x80u) >> 7u;
-
-    registers[0xf] = msb;
-
     registers[x] <<= 1;
+    registers[0xf] = msb;
 };
 
 // 9xy0 - SNE Vx, Vy
@@ -476,7 +488,6 @@ void Chip8::OPCxkk()
 // The interpreter reads n bytes from memory, starting at the address stored in I. These bytes are then displayed as sprites on screen at coordinates (Vx, Vy). Sprites are XORed onto the existing screen. If this causes any pixels to be erased, VF is set to 1, otherwise it is set to 0. If the sprite is positioned so part of it is outside the coordinates of the display, it wraps around to the opposite side of the screen. See instruction 8xy3 for more information on XOR, and section 2.4, Display, for more information on the Chip-8 screen and sprites.
 void Chip8::OPDxyn()
 {
-    shouldDraw = true;
 
     uint8_t _x = (opcode & X_MASK) >> 8u;
     uint8_t _y = (opcode & Y_MASK) >> 4u;

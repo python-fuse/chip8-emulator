@@ -44,7 +44,6 @@ struct Chip8
     uint16_t opcode;
 
     // draw flag
-    bool shouldDraw;
 
     const unsigned int START_ADRESS = 0x200;
 
@@ -68,7 +67,6 @@ struct Chip8
         sp = 0;
         d_timer = 0;
         s_timer = 0;
-        shouldDraw = false;
 
         for (unsigned int i = 0; i < 80; ++i)
         {

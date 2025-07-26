@@ -23,12 +23,7 @@ int main(int argc, char **argv)
 
         chip8.Cycle();
 
-        if (chip8.shouldDraw)
-        {
-
-            platform.display(chip8.screen);
-            chip8.shouldDraw = false;
-        }
-        sf::sleep(sf::milliseconds(2));
+        platform.display(chip8.screen);
+        sf::sleep(sf::milliseconds(16));
     }
 }

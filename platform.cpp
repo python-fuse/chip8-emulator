@@ -3,7 +3,7 @@
 
 using namespace sf;
 
-Platform::Platform(std::string title) : window(sf::VideoMode({windowWidth * pixelSize, windowHeight * pixelSize}), title)
+Platform::Platform(std::string title) : window(sf::VideoMode({static_cast<unsigned int>(windowWidth * pixelSize), static_cast<unsigned int>(windowHeight * pixelSize)}), title)
 {
     window.setFramerateLimit(60);
 

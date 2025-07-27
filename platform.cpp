@@ -1,15 +1,13 @@
 #include <iostream>
 #include "platform.hpp"
+// #include <SFML/Audio.hpp>
 
 using namespace sf;
 
-Platform::Platform(std::string title) : window(sf::VideoMode({static_cast<unsigned int>(windowWidth * pixelSize), static_cast<unsigned int>(windowHeight * pixelSize)}), title)
+Platform::Platform(std::string title, Chip8 *chip) : window(sf::VideoMode({static_cast<unsigned int>(windowWidth * pixelSize), static_cast<unsigned int>(windowHeight * pixelSize)}), title), sBuffer("assets/beep.mp3"), s(sBuffer)
 {
+    this->chip = chip;
     window.setFramerateLimit(60);
-
-    // Debug output
-    std::cout << "Platform constructor - windowWidth: " << windowWidth << ", windowHeight: " << windowHeight << std::endl;
-    std::cout << "Window size: " << windowWidth * pixelSize << "x" << windowHeight * pixelSize << std::endl;
 }
 
 Platform::~Platform()
@@ -102,4 +100,14 @@ void Platform::processInput(uint8_t *keys)
         keys[0xb] = 1;
     if (Keyboard::isKeyPressed(Keyboard::Scan::V))
         keys[0xf] = 1;
+}
+
+void Platform::beep()
+{
+    std::cout << "chip" << chip;
+
+    if (chip->s_timer > 0)
+    {
+        s.play();
+    }
 }

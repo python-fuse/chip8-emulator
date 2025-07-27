@@ -1,6 +1,6 @@
 CXX = g++
 CXXFLAGS = -Wall -std=c++17
-LDFLAGS = -lsfml-graphics -lsfml-window -lsfml-system
+LDFLAGS = -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio
 SRC = main.cpp platform.cpp chip8.cpp
 OBJ = $(SRC:.cpp=.o)
 OUT = chip8

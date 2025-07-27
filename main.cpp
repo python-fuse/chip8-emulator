@@ -11,8 +11,8 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    Platform platform("cHiP8");
     Chip8 chip8;
+    Platform platform("cHiP8", &chip8);
 
     chip8.LoadRom(argv[1]);
 
@@ -22,6 +22,7 @@ int main(int argc, char **argv)
         platform.processInput(chip8.keypad);
 
         chip8.Cycle();
+        platform.beep();
 
         platform.display(chip8.screen);
         sf::sleep(sf::milliseconds(16));

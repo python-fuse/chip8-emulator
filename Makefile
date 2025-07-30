@@ -1,18 +1,39 @@
-CXX = g++
-CXXFLAGS = -Wall -std=c++17
-LDFLAGS = -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio
-SRC = main.cpp platform.cpp chip8.cpp
-OBJ = $(SRC:.cpp=.o)
-OUT = chip8
+# ------------------------------------------------------------------
+#  Makefile for CHIP‑8 emulator with SFML + ImGui + ImGui‑SFML
+# ------------------------------------------------------------------
 
-all: $(OUT)
+CXX        := g++
+CXXFLAGS   := -Wall -std=c++17 -Iimgui -I.
+LDFLAGS    := -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio -lGL
 
-$(OUT): $(OBJ)
-	$(CXX) $(OBJ) -o $(OUT) $(LDFLAGS)
-	rm -rf $(OBJ)
+# List all your .cpp files (main emulator + ImGui + ImGui‑SFML)
+SRCS := \
+    main.cpp \
+    platform.cpp \
+    chip8.cpp \
+    imgui/imgui.cpp \
+    imgui/imgui_draw.cpp \
+    imgui/imgui_tables.cpp \
+    imgui/imgui_widgets.cpp \
+    imgui/imgui_demo.cpp \
+    imgui/imgui-SFML.cpp
 
+# Automatically turn them into .o names:
+OBJS := $(SRCS:.cpp=.o)
+
+TARGET := chip8
+
+# Default rule
+all: $(TARGET)
+
+# Link step
+$(TARGET): $(OBJS)
+	$(CXX) $(CXXFLAGS) $(OBJS) -o $(TARGET) $(LDFLAGS)
+
+# Compile rule (works for both top‑level and subdirs)
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
+# Clean up
 clean:
-	rm -f $(OBJ) $(OUT)
+	rm -f $(OBJS) $(TARGET)

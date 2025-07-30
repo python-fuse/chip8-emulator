@@ -12,6 +12,7 @@ private:
     const int windowHeight = 32;
     const int pixelSize = 10;
     sf::RenderWindow window;
+    sf::Clock deltaClock;
 
     std::string soundPath = "assets/beep.mp3";
 

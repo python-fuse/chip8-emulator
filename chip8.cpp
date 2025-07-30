@@ -535,7 +535,7 @@ void Chip8::OPEx9E()
     uint8_t x = (opcode & X_MASK) >> 8u;
     uint8_t key = registers[x];
 
-    if (keypad[key])
+    if (keypad[key & 0xF])
     {
         pc += 2;
     }
@@ -549,7 +549,7 @@ void Chip8::OPExA1()
     uint8_t x = (opcode & X_MASK) >> 8u;
     uint8_t key = registers[x];
 
-    if (!keypad[key])
+    if (!keypad[key & 0xF])
     {
         pc += 2;
     }

@@ -46,3 +46,5 @@
 chip8
 
 test*
+
+build/

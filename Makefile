@@ -3,10 +3,9 @@
 # ------------------------------------------------------------------
 
 CXX        := g++
-CXXFLAGS   := -Wall -std=c++17 -Iimgui -I.
+CXXFLAGS   := -Wall -std=c++17 -Iimgui -I. -Itinyfile
 LDFLAGS    := -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio -lGL
 
-# List all your .cpp files (main emulator + ImGui + ImGui‑SFML)
 SRCS := \
     main.cpp \
     platform.cpp \
@@ -16,24 +15,30 @@ SRCS := \
     imgui/imgui_tables.cpp \
     imgui/imgui_widgets.cpp \
     imgui/imgui_demo.cpp \
-    imgui/imgui-SFML.cpp
+    imgui/imgui-SFML.cpp  \
+    tinyfile/tinyfiledialogs.c
 
-# Automatically turn them into .o names:
+# Convert all .cpp and .c files in SRCS to .o
 OBJS := $(SRCS:.cpp=.o)
+OBJS := $(OBJS:.c=.o)
 
 TARGET := chip8
 
-# Default rule
 all: $(TARGET)
 
-# Link step
 $(TARGET): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) -o $(TARGET) $(LDFLAGS)
 
-# Compile rule (works for both top‑level and subdirs)
+# Build rule for .cpp
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# Clean up
+# Build rule for .c
+%.o: %.c
+	$(CC) -std=c99 -I. -Itinyfile -c $< -o $@
+# or if you want to keep using g++ for C code too:
+# %.o: %.c
+# 	$(CXX) $(CXXFLAGS) -x c -c $< -o $@
+
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f $(OBJS)

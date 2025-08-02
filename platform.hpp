@@ -31,4 +31,5 @@ public:
     bool isOpen() const;
     void processInput(uint8_t *keys);
     void beep();
+    static char *pickFile();
 };

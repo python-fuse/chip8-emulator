@@ -43,6 +43,12 @@ struct Chip8
     // opcode
     uint16_t opcode;
 
+    // Load rom flag + rom path
+    bool shouldLoad = false;
+    char *romPath;
+
+    bool ready = false;
+
     // draw flag
 
     const unsigned int START_ADRESS = 0x200;
@@ -53,14 +59,8 @@ struct Chip8
     {
         pc = START_ADRESS;
 
-        // Initialize screen to all black (0)
-        memset(screen, 0, sizeof(screen));
-
         // Initialize all other arrays
-        memset(memory, 0, sizeof(memory));
-        memset(registers, 0, sizeof(registers));
-        memset(keypad, 0, sizeof(keypad));
-        memset(stack, 0, sizeof(stack));
+        reset();
 
         // Reset other variables
         IR = 0;
@@ -68,17 +68,27 @@ struct Chip8
         d_timer = 0;
         s_timer = 0;
 
-        for (unsigned int i = 0; i < 80; ++i)
-        {
-            memory[FONTSET_START_ADDRESS + i] = fontset[i];
-        }
-
         // rg
         randByte = std::uniform_int_distribution<uint8_t>(0, 255);
     }
 
     std::default_random_engine randGen;
     std::uniform_int_distribution<uint8_t> randByte;
+
+    void reset()
+    {
+        memset(screen, 0, sizeof(screen));
+        memset(memory, 0, sizeof(memory));
+        memset(registers, 0, sizeof(registers));
+        memset(keypad, 0, sizeof(keypad));
+        memset(stack, 0, sizeof(stack));
+        pc = START_ADRESS;
+
+        for (unsigned int i = 0; i < 80; ++i)
+        {
+            memory[FONTSET_START_ADDRESS + i] = fontset[i];
+        }
+    }
 
     uint8_t fontset[80] =
         {

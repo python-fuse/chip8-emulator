@@ -2,27 +2,33 @@
 #include "platform.hpp"
 #include "chip8.hpp"
 
-int main(int argc, char **argv)
+int main()
 {
-    if (argc != 2)
-    {
-        std::cerr << "Usage: " << argv[0] << "<Rom>\n";
-        std::exit(EXIT_FAILURE);
-        return -1;
-    }
 
     Chip8 chip8;
     Platform platform("cHiP8", &chip8);
 
-    chip8.LoadRom(argv[1]);
-
     while (platform.isOpen())
     {
-        platform.handleEvents();
-        platform.processInput(chip8.keypad);
+        if (chip8.shouldLoad)
+        {
+            chip8.reset();
+            chip8.LoadRom(chip8.romPath);
+            chip8.romPath = nullptr;
+            chip8.shouldLoad = false;
+            chip8.ready = true;
+        }
 
-        chip8.Cycle();
-        platform.beep();
+        platform.handleEvents();
+
+        if (chip8.ready)
+        {
+
+            platform.processInput(chip8.keypad);
+
+            chip8.Cycle();
+            platform.beep();
+        }
 
         platform.display(chip8.screen);
         sf::sleep(sf::milliseconds(16));

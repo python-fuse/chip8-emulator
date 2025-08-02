@@ -2,6 +2,7 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui-SFML.h"
 #include "platform.hpp"
+#include "tinyfile/tinyfiledialogs.h"
 
 using namespace sf;
 using namespace sf::Keyboard;
@@ -46,11 +47,29 @@ void Platform::display(void const *buffer)
 {
     ImGui::SFML::Update(window, deltaClock.restart());
 
-    std::cout << "Displaying frame\n";
+    if (ImGui::BeginMainMenuBar())
+    {
+        if (ImGui::BeginMenu("File"))
+        {
+            if (ImGui::MenuItem("Load ROM"))
+            {
+                // Set a flag to open file dialog or hardcoded loader
+                // loadRom("roms/INVADERS"); // or use std::ifstream picker
 
-    // ImGui::BeginMenu("Mev");
-    // ImGui::Button("Look at this pretty button");
-    // ImGui::EndMenu();
+                char *loadedFilePath = Platform::pickFile();
+
+                std::cout << "File loaded" << std::endl;
+                chip->romPath = loadedFilePath;
+                chip->shouldLoad = true;
+            }
+            if (ImGui::MenuItem("Exit"))
+            {
+                window.close();
+            }
+            ImGui::EndMenu();
+        }
+        ImGui::EndMainMenuBar();
+    }
 
     const uint32_t *pixels = static_cast<const uint32_t *>(buffer);
 
@@ -75,6 +94,20 @@ void Platform::display(void const *buffer)
 
     window.display();
 }
+
+char *Platform::pickFile()
+{
+    const char *filters[] = {"*.ch8", "*.c8b"};
+
+    char *filePath = tinyfd_openFileDialog(
+        "Select a CHIP8 ROM",
+        "~/Desktop",
+        2,
+        filters, "Chip8 .ch8 or .c8b files.", 0);
+
+    return filePath;
+}
+
 void Platform::processInput(uint8_t *keys)
 {
     for (int i = 0; i < 16; i++)

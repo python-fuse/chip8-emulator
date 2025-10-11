@@ -30,7 +30,7 @@ int main()
             platform.beep();
         }
 
-        platform.display(chip8.screen);
+        platform.display();
         sf::sleep(sf::milliseconds(16));
     }
 }

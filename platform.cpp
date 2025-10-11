@@ -43,7 +43,7 @@ bool Platform::isOpen() const
     return window.isOpen();
 }
 
-void Platform::display(void const *buffer)
+void Platform::display()
 {
     ImGui::SFML::Update(window, deltaClock.restart());
 
@@ -53,9 +53,6 @@ void Platform::display(void const *buffer)
         {
             if (ImGui::MenuItem("Load ROM"))
             {
-                // Set a flag to open file dialog or hardcoded loader
-                // loadRom("roms/INVADERS"); // or use std::ifstream picker
-
                 char *loadedFilePath = Platform::pickFile();
 
                 std::cout << "File loaded" << std::endl;
@@ -71,28 +68,10 @@ void Platform::display(void const *buffer)
         ImGui::EndMainMenuBar();
     }
 
-    const uint32_t *pixels = static_cast<const uint32_t *>(buffer);
-
     window.clear();
-    sf::RectangleShape pixelShape({(float)pixelSize, (float)pixelSize});
-    pixelShape.setFillColor(sf::Color::White);
-
-    // Fixed: Use windowWidth and windowHeight directly (64x32)
-    for (int y = 0; y < windowHeight; ++y)
-    {
-        for (int x = 0; x < windowWidth; ++x)
-        {
-            if (pixels[y * windowWidth + x])
-            {
-                pixelShape.setPosition(sf::Vector2<float>(x * pixelSize, y * pixelSize));
-                window.draw(pixelShape);
-            }
-        }
-    }
-
-    ImGui::SFML::Render(window);
-
+    DrawEmulatorMainWindow();
     window.display();
+    ImGui::SFML::Render(window);
 }
 
 char *Platform::pickFile()
@@ -156,5 +135,28 @@ void Platform::beep()
     if (chip->s_timer > 0)
     {
         s.play();
+    }
+}
+
+void Platform::DrawEmulatorMainWindow()
+{
+    float menuBarHeight = ImGui::GetFrameHeight();
+
+    const uint32_t *pixels = static_cast<const uint32_t *>(chip->screen);
+
+    sf::RectangleShape pixelShape({(float)pixelSize, (float)pixelSize});
+    pixelShape.setFillColor(sf::Color::White);
+
+    // Fixed: Use windowWidth and windowHeight directly (64x32)
+    for (int y = 0; y < windowHeight; ++y)
+    {
+        for (int x = 0; x < windowWidth; ++x)
+        {
+            if (pixels[y * windowWidth + x])
+            {
+                pixelShape.setPosition(sf::Vector2<float>(x * pixelSize, y * pixelSize + menuBarHeight));
+                window.draw(pixelShape);
+            }
+        }
     }
 }

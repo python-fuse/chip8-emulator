@@ -27,9 +27,10 @@ public:
 
     void handleEvents();
     void clear();
-    void display(void const *buffer);
+    void display();
     bool isOpen() const;
     void processInput(uint8_t *keys);
     void beep();
+    void DrawEmulatorMainWindow();
     static char *pickFile();
 };
